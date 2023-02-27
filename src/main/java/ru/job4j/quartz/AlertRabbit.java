@@ -5,6 +5,8 @@ import org.quartz.impl.StdSchedulerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.Properties;
 
 import static org.quartz.JobBuilder.newJob;
@@ -12,15 +14,17 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 public class AlertRabbit {
+    private static final Properties propertiesRabbit = load("rabbit.properties");
+
     public static void main(String[] args) {
         try {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
-            AlertRabbit alertRabbit = new AlertRabbit();
+
             scheduler.start();
             JobDetail job = newJob(Rabbit.class).build();
             SimpleScheduleBuilder times = simpleSchedule()
                     .withIntervalInSeconds(
-                            Integer.parseInt(alertRabbit.load("rabbit.properties")
+                            Integer.parseInt(propertiesRabbit
                                     .getProperty("rabbit.interval")))
                     .repeatForever();
             Trigger trigger = newTrigger()
@@ -28,7 +32,9 @@ public class AlertRabbit {
                     .withSchedule(times)
                     .build();
             scheduler.scheduleJob(job, trigger);
-        } catch (SchedulerException se) {
+            Thread.sleep(Integer.parseInt(propertiesRabbit.getProperty("thread.sleep")));
+            scheduler.shutdown();
+        } catch (SchedulerException | InterruptedException se) {
             se.printStackTrace();
         }
     }
@@ -37,11 +43,18 @@ public class AlertRabbit {
         @Override
         public void execute(JobExecutionContext context) {
             System.out.println("Rabbit runs here ...");
+            try (PreparedStatement statement = connection().prepareStatement(
+                    "insert into rabbit(created_date) values(?);")) {
+                statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+                statement.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-
     }
 
-    public Properties load(String fileName) {
+
+    public static Properties load(String fileName) {
         Properties properties = new Properties();
         try (InputStream input = Rabbit.class.getClassLoader().getResourceAsStream(fileName)) {
             properties.load(input);
@@ -49,6 +62,20 @@ public class AlertRabbit {
             throw new RuntimeException(ex);
         }
         return properties;
+    }
+
+    public static Connection connection() {
+        Connection connection = null;
+        try {
+            Class.forName(propertiesRabbit.getProperty("driver-class-name"));
+            connection = DriverManager.getConnection(
+                    propertiesRabbit.getProperty("url"),
+                    propertiesRabbit.getProperty("username"),
+                    propertiesRabbit.getProperty("password"));
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return connection;
     }
 
 }
