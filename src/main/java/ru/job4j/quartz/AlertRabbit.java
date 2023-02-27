@@ -14,7 +14,7 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 public class AlertRabbit {
-    private static final Properties propertiesRabbit = load("rabbit.properties");
+    private static final Properties PROPERTIES_RABBIT = load("rabbit.properties");
 
     public static void main(String[] args) {
         try {
@@ -24,7 +24,7 @@ public class AlertRabbit {
             JobDetail job = newJob(Rabbit.class).build();
             SimpleScheduleBuilder times = simpleSchedule()
                     .withIntervalInSeconds(
-                            Integer.parseInt(propertiesRabbit
+                            Integer.parseInt(PROPERTIES_RABBIT
                                     .getProperty("rabbit.interval")))
                     .repeatForever();
             Trigger trigger = newTrigger()
@@ -32,7 +32,7 @@ public class AlertRabbit {
                     .withSchedule(times)
                     .build();
             scheduler.scheduleJob(job, trigger);
-            Thread.sleep(Integer.parseInt(propertiesRabbit.getProperty("thread.sleep")));
+            Thread.sleep(Integer.parseInt(PROPERTIES_RABBIT.getProperty("thread.sleep")));
             scheduler.shutdown();
         } catch (SchedulerException | InterruptedException se) {
             se.printStackTrace();
@@ -67,11 +67,11 @@ public class AlertRabbit {
     public static Connection connection() {
         Connection connection = null;
         try {
-            Class.forName(propertiesRabbit.getProperty("driver-class-name"));
+            Class.forName(PROPERTIES_RABBIT.getProperty("driver-class-name"));
             connection = DriverManager.getConnection(
-                    propertiesRabbit.getProperty("url"),
-                    propertiesRabbit.getProperty("username"),
-                    propertiesRabbit.getProperty("password"));
+                    PROPERTIES_RABBIT.getProperty("url"),
+                    PROPERTIES_RABBIT.getProperty("username"),
+                    PROPERTIES_RABBIT.getProperty("password"));
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
