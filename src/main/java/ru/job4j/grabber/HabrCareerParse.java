@@ -12,6 +12,18 @@ public class HabrCareerParse {
     private static final String SOURCE_LINK = "https://career.habr.com";
     private static final int NUMBER_OF_PAGES = 5;
 
+    public static String retrieveDescription(String link) {
+        Connection connection = Jsoup.connect(link);
+        Document document;
+        try {
+            document = connection.get();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Element description = document.select(".vacancy-description__text").first();
+        return description.text();
+    }
+
     public static void printVacancies(int numberOfPages) {
         for (int i = 1; i <= numberOfPages; i++) {
             Connection connection = Jsoup.connect(String.format("%s/vacancies/java_developer?page%d", SOURCE_LINK, i));
