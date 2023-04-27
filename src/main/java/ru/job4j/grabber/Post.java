@@ -4,11 +4,18 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Post {
-    int id;
-    String title;
-    String link;
-    String description;
-    LocalDateTime create;
+    private int id;
+    private String title;
+    private String link;
+    private String description;
+    private LocalDateTime create;
+
+    public Post(String title, String link, String description, LocalDateTime create) {
+        this.title = title;
+        this.link = link;
+        this.description = description;
+        this.create = create;
+    }
 
     @Override
     public boolean equals(Object o) {
