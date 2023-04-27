@@ -19,9 +19,12 @@ public class AlertRabbit {
     public static void main(String[] args) {
         try {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
-
             scheduler.start();
-            JobDetail job = newJob(Rabbit.class).build();
+            JobDataMap jobDataMap = new JobDataMap();
+            jobDataMap.put("connection", connection());
+            JobDetail jobDetail = newJob(Rabbit.class)
+                    .usingJobData(jobDataMap)
+                    .build();
             SimpleScheduleBuilder times = simpleSchedule()
                     .withIntervalInSeconds(
                             Integer.parseInt(PROPERTIES_RABBIT
@@ -31,7 +34,7 @@ public class AlertRabbit {
                     .startNow()
                     .withSchedule(times)
                     .build();
-            scheduler.scheduleJob(job, trigger);
+            scheduler.scheduleJob(jobDetail, trigger);
             Thread.sleep(Integer.parseInt(PROPERTIES_RABBIT.getProperty("thread.sleep")));
             scheduler.shutdown();
         } catch (SchedulerException | InterruptedException se) {
@@ -43,7 +46,8 @@ public class AlertRabbit {
         @Override
         public void execute(JobExecutionContext context) {
             System.out.println("Rabbit runs here ...");
-            try (PreparedStatement statement = connection().prepareStatement(
+            Connection connection = (Connection) context.getJobDetail().getJobDataMap().get("connection");
+            try (PreparedStatement statement = connection.prepareStatement(
                     "insert into rabbit(created_date) values(?);")) {
                 statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
                 statement.execute();
@@ -52,7 +56,6 @@ public class AlertRabbit {
             }
         }
     }
-
 
     public static Properties load(String fileName) {
         Properties properties = new Properties();
@@ -77,5 +80,4 @@ public class AlertRabbit {
         }
         return connection;
     }
-
 }
