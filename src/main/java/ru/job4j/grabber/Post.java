@@ -19,19 +19,18 @@ public class Post {
             return false;
         }
         Post post = (Post) o;
-        return id == post.id && title.equals(post.title) && link.equals(post.link);
+        return id == post.id && link.equals(post.link);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, link);
+        return Objects.hash(id, link);
     }
 
     @Override
     public String toString() {
         return "Post{"
-                + "id="
-                + id
+                + "id=" + id
                 + ", title='" + title + '\''
                 + ", link='" + link + '\''
                 + ", description='" + description + '\''
