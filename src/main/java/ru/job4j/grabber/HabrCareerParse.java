@@ -15,9 +15,9 @@ import java.util.List;
 public class HabrCareerParse implements Parse {
     private static final String SOURCE_LINK = "https://career.habr.com";
     private static final String PAGES = "/vacancies/java_developer?page=";
-    private static final int NUMBER_OF_PAGES = 5;
     private final DateTimeParser dateTimeParser;
-    private static final List<Post> LIST_OF_VACANCIES = new ArrayList<>();
+    public static final List<Post> LIST_OF_VACANCIES = new ArrayList<>();
+    public static final int NUMBER_OF_PAGES = 5;
 
     public HabrCareerParse(DateTimeParser dateTimeParser) {
         this.dateTimeParser = dateTimeParser;
@@ -37,14 +37,6 @@ public class HabrCareerParse implements Parse {
         }
         Element description = document.select(".vacancy-description__text").first();
         return description.text();
-    }
-
-    public static void main(String[] args) {
-        HabrCareerParse habrCareerParse = new HabrCareerParse(new HabrCareerDateTimeParser());
-        for (int i = 1; i <= NUMBER_OF_PAGES; i++) {
-            habrCareerParse.list(generateLinkOfPage(i));
-        }
-        System.out.println(LIST_OF_VACANCIES);
     }
 
     @Override
@@ -69,5 +61,22 @@ public class HabrCareerParse implements Parse {
             LIST_OF_VACANCIES.add(new Post(vacancyName, link, description, dateTimeParser.parse(date)));
         });
         return LIST_OF_VACANCIES;
+    }
+
+    @Override
+    public List<Post> listWithAllPages() {
+        HabrCareerParse habrCareerParse = new HabrCareerParse(new HabrCareerDateTimeParser());
+        for (int i = 1; i <= NUMBER_OF_PAGES; i++) {
+            habrCareerParse.list(generateLinkOfPage(i));
+        }
+        return LIST_OF_VACANCIES;
+    }
+
+    public static void main(String[] args) {
+        HabrCareerParse habrCareerParse = new HabrCareerParse(new HabrCareerDateTimeParser());
+        for (int i = 2; i <= NUMBER_OF_PAGES; i++) {
+            habrCareerParse.list(generateLinkOfPage(i));
+        }
+        System.out.println(LIST_OF_VACANCIES);
     }
 }
