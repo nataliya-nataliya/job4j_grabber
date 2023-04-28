@@ -67,7 +67,6 @@ public class PsqlStore implements Store {
     public Post findById(int id) {
         Post post = null;
         try (PreparedStatement preparedStatement = cnn.prepareStatement("select * from post where id = ?")) {
-
             preparedStatement.setInt(1, id);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
@@ -86,8 +85,8 @@ public class PsqlStore implements Store {
         return new Post(
                 resultSet.getInt("id"),
                 resultSet.getString("name"),
-                resultSet.getString("text"),
                 resultSet.getString("link"),
+                resultSet.getString("text"),
                 localDateTime
         );
     }

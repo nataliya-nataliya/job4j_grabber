@@ -17,7 +17,7 @@ public class HabrCareerParse implements Parse {
     private static final String PAGES = "/vacancies/java_developer?page=";
     private final DateTimeParser dateTimeParser;
     public static final List<Post> LIST_OF_VACANCIES = new ArrayList<>();
-    public static final int NUMBER_OF_PAGES = 5;
+    public static final int NUMBER_OF_PAGES = 1;
 
     public HabrCareerParse(DateTimeParser dateTimeParser) {
         this.dateTimeParser = dateTimeParser;
@@ -74,9 +74,9 @@ public class HabrCareerParse implements Parse {
 
     public static void main(String[] args) {
         HabrCareerParse habrCareerParse = new HabrCareerParse(new HabrCareerDateTimeParser());
-        for (int i = 2; i <= NUMBER_OF_PAGES; i++) {
+        for (int i = 1; i <= NUMBER_OF_PAGES; i++) {
             habrCareerParse.list(generateLinkOfPage(i));
         }
-        System.out.println(LIST_OF_VACANCIES);
+        System.out.println(LIST_OF_VACANCIES.get(1).getLink());
     }
 }
